@@ -18,6 +18,7 @@ local function get_new_chat_filename()
     date.hour,
     date.min
   )
+  return filename
 end
 
 local function get_chat_dir()
@@ -38,9 +39,15 @@ M.new_chat = function()
   if chat == nil then
     return nil
   end
-  chat:write("# Chat\n\n")
+  local template = require("dllm.template").chat_template
+  chat:write(template)
   chat:close()
   vim.cmd("edit " .. path)
+  -- find the line starting with "role:"
+  -- and place the cursor at the end of the line
+  vim.cmd [[/^role:/]]
+  vim.cmd [[normal! $]]
+  vim.cmd [[nohlsearch]]
   return chat
 end
 
