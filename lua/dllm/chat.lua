@@ -1,3 +1,6 @@
+local paths = require("dllm.paths")
+
+
 local function get_month(date)
   local months = {
     "jan", "feb", "mar", "apr", "may", "jun",
@@ -22,7 +25,7 @@ local function get_new_chat_filename()
 end
 
 local function get_chat_dir()
-  local chat_dir = vim.fn.stdpath("data") .. "/dllm/chats"
+  local chat_dir = paths.chats()
   if vim.fn.isdirectory(chat_dir) == 0 then
     vim.fn.mkdir(chat_dir, "p")
   end

@@ -1,38 +1,59 @@
-local api = vim.api
-local fn = vim.fn
-
+local paths = require("dllm.paths")
 local M = {}
 
-local function get_dllm_path()
-  return vim.fn.stdpath('data') .. '/dllm/dllm'
-end
 
-
-M.check_dllm_installed = function()
-  local ok = vim.fn.filereadable(get_dllm_path()) == 1
-  if not ok then
-    return ok
-  end
-  ok = vim.fn.filereadable(get_dllm_path() .. '/build/server') == 1
-  return ok
+M.is_dllm_installed = function()
+  return paths.exists(paths.dllm_server())
 end
 
 M.install_dllm = function()
-  if M.check_dllm_installed() then
+  vim.notify('Installing dllm')
+  if M.is_dllm_installed() then
     vim.notify('dllm is already installed')
     return
   end
-  local dllm_url = "https://github.com/festeh/dllm"
+  if not paths.exists(paths.dllm_repo()) then
+    vim.notify('Cloning dllm repo')
+    local dllm_url = "https://github.com/festeh/dllm"
+    local cmd = {
+      "git", "clone",
+      dllm_url,
+      paths.dllm_repo()
+    }
+    local res = vim.system(cmd):wait()
+    if res.code ~= 0 then
+      vim.notify('Error cloning dllm repo:' .. res.stderr)
+      return
+    end
+    vim.notify('dllm repo cloned')
+  else
+    vim.notify('Updating dllm repo')
+    local cmd = {
+      "git",
+      "-C",
+      paths.dllm_repo(),
+      "pull"
+    }
+    local res = vim.system(cmd):wait()
+    if res.code ~= 0 then
+      vim.notify('Error updating dllm repo:' .. res.stderr)
+      return
+    end
+    vim.notify('dllm repo updated')
+  end
+  vim.notify('Building dllm server')
   local cmd = {
-    "git", "clone",
-    dllm_url,
-    get_dllm_path()
+    "make",
+    "-C",
+    paths.dllm_repo(),
+    "install_server"
   }
-  local res = vim.system(cmd, { stdout = false }):wait()
+  local res = vim.system(cmd):wait()
   if res.code ~= 0 then
-    vim.notify('Error:' .. res.stderr)
+    vim.notify('Error building dllm server:' .. res.stderr)
     return
   end
+  vim.notify('dllm server built')
 end
 
 
