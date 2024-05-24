@@ -2,6 +2,8 @@
 
 
 return {
+  user_prefix = "User:",
+  system_prefix = "System:",
   default_provider = "anthropic",
   temperature = 0.0,
   max_tokens = 3000,
