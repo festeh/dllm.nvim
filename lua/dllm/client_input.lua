@@ -115,6 +115,12 @@ ClientInput.from_chat = function(config, lines, opts)
   return ClientInput.new(gathered.params, gathered.prompt, gathered.messages)
 end
 
+function ClientInput:to_request_body()
+  local result = {}
+  table.insert(result, { role = "", content = self.prompt })
+  return vim.json.encode(result)
+end
+
 --- End parsing chat content
 
 return ClientInput
