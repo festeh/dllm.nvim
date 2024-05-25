@@ -24,10 +24,9 @@ function ChatParsingContext:read_message_fn()
   local err = nil
   local config = self.config
 
-  local function read_line(context, gathered, line)
+  local function read_line(_, gathered, line)
     gathered.messages = gathered.messages or {}
     if state == reading_user then
-      -- if line starts with config.user_prefix
       if line:sub(1, #config.user_prefix) == config.user_prefix then
         local user_message = trim_left(line:sub(#config.user_prefix + 1))
         gathered.messages[#gathered.messages + 1] = { role = "user", content = user_message }
@@ -91,13 +90,12 @@ function ChatParsingContext:read_title(gathered, line)
   return nil, "Title not found"
 end
 
-
-ClientInput.from_chat = function(config, content)
+ClientInput.from_chat = function(config, lines, opts)
   local gathered = {}
   local context = ChatParsingContext.new(config)
   local proc_fn = context.read_title
   --- reading header
-  for line in content:gmatch("[^\r\n]+") do
+  for line in lines do
     print("line", line)
     local new_fn, err = proc_fn(context, gathered, line)
     if not new_fn then
@@ -110,6 +108,10 @@ ClientInput.from_chat = function(config, content)
     vim.notify("Warning: no prompt found")
   end
   gathered.prompt = gathered.prompt or ""
+  opts = opts or {}
+  if opts.n ~= nil then
+    gathered.messages = { table.unpack(gathered.messages, #gathered.messages - opts.n + 1) }
+  end
   return ClientInput.new(gathered.params, gathered.prompt, gathered.messages)
 end
 

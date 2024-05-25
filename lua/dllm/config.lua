@@ -1,6 +1,3 @@
-
-
-
 return {
   user_prefix = "User:",
   system_prefix = "System:",

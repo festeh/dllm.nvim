@@ -1,4 +1,7 @@
 local paths = require("dllm.paths")
+local class = require("dllm.class")
+local ClientInput = require("dllm.client_input")
+
 
 
 local function get_month(date)
@@ -24,28 +27,37 @@ local function get_new_chat_filename()
   return filename
 end
 
-local function get_chat_dir()
+local function get_new_chat_path()
+  local filename = get_new_chat_filename()
   local chat_dir = paths.chats()
   if vim.fn.isdirectory(chat_dir) == 0 then
     vim.fn.mkdir(chat_dir, "p")
   end
-  return chat_dir
+  return chat_dir .. "/" .. filename
 end
 
-local M = {}
+Chat = class.new(function(self, config)
+  self.config = config
+end)
 
-M.new_chat = function()
-  local dir = get_chat_dir()
-  local filename = get_new_chat_filename()
-  local path = dir .. "/" .. filename
-  local chat = io.open(path, "w")
-  if chat == nil then
+function Chat:respond(opts)
+  local lines = vim.api.nvim_buf_get_lines(0, 0, -1, false)
+  local client_input = ClientInput.from_chat(self.config, lines, opts)
+  local client = require("dllm.client").new(self.config, client_input)
+  client:respond()
+end
+
+Chat.create_file = function(config)
+  local chat = Chat.new(config)
+
+  local chat_path = get_new_chat_path()
+  local chat_file = io.open(chat_path, "w")
+  if chat_file == nil then
     return nil
   end
-  local template = require("dllm.template").chat_template
-  chat:write(template)
-  chat:close()
-  vim.cmd("edit " .. path)
+  chat_file:write(require("dllm.template").chat_template)
+  chat_file:close()
+  vim.cmd("edit " .. chat_path)
   -- find the line starting with "role:"
   -- and place the cursor at the end of the line
   vim.cmd [[/^role:/]]
@@ -54,4 +66,4 @@ M.new_chat = function()
   return chat
 end
 
-return M
+return Chat
