@@ -2,7 +2,7 @@ local Chat = require('dllm.chat')
 local config = require('dllm.config')
 
 
-vim.api.create_user_command("lmnewchat",
+vim.api.nvim_create_user_command("lmnewchat",
   function(_)
     Chat.create_file(config)
   end,
@@ -12,7 +12,7 @@ vim.api.create_user_command("lmnewchat",
   }
 )
 
-vim.api.create_user_command("lmrespond",
+vim.api.nvim_create_user_command("lmrespond",
   function(opts)
     local chat = Chat.new(config)
     chat:respond(opts)
