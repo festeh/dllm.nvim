@@ -6,7 +6,8 @@ for pack, _ in pairs(package.loaded) do
   end
 end
 
-local m = require("dllm")
-local chat = require("dllm.chat")
+local Chat = require("dllm.chat")
 
-chat.new_chat()
+Chat.create_file({
+  user_prefix = "[USER]",
+})

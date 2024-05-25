@@ -3,7 +3,6 @@ local class = require("dllm.class")
 local ClientInput = require("dllm.client_input")
 
 
-
 local function get_month(date)
   local months = {
     "jan", "feb", "mar", "apr", "may", "jun",
@@ -56,13 +55,14 @@ Chat.create_file = function(config)
     return nil
   end
   chat_file:write(require("dllm.template").chat_template)
+  chat_file:write(config.user_prefix .. " ")
   chat_file:close()
   vim.cmd("edit " .. chat_path)
   -- find the line starting with "role:"
-  -- and place the cursor at the end of the line
+  -- and set the cursor to append to line mode
   vim.cmd [[/^role:/]]
-  vim.cmd [[normal! $]]
   vim.cmd [[nohlsearch]]
+  vim.cmd [[startinsert!]]
   return chat
 end
 
