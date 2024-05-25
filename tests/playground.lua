@@ -1,10 +1,3 @@
 
-
-
-local function closure()
-  local history = {}
-  local function add_to_history(item)
-    table.insert(history, item)
-  end
-  return 
-end
+local content = vim.api.nvim_buf_get_lines(0, 0, -1, false)
+print(vim.inspect(content))
