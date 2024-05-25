@@ -1,4 +1,5 @@
-return {
+--- @class Config
+Config = {
   user_prefix = "User:",
   system_prefix = "System:",
   default_provider = "anthropic",
@@ -9,5 +10,9 @@ return {
   },
   anthropic = {
     default_model = "claude-3"
-  }
+  },
+  port = 4242,
+  hostname = "localhost",
 }
+
+return Config

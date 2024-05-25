@@ -19,3 +19,5 @@ if not manager:is_installed({ verbose = true }) then
   print("dllm is not installed")
   -- manager:install()
 end
+
+manager:start()

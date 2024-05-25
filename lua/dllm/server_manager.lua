@@ -61,4 +61,28 @@ function ServerManager:install()
   vim.notify('dllm server built')
 end
 
+function ServerManager:start()
+  if not self:is_installed() then
+    vim.notify('dllm is not installed')
+    return
+  end
+
+  local res = vim.system({ "pgrep", "dllm_server" }):wait()
+  if res.code == 0 then
+    return
+  end
+
+  local cmd = {
+    paths.dllm_server(),
+  }
+  self.job = vim.fn.jobstart(cmd, {
+    on_exit = function(_, code)
+      if code ~= 0 then
+        vim.notify('dllm server exited with code ' .. code)
+      end
+      vim.notify('dllm server exited')
+    end
+  })
+end
+
 return ServerManager
