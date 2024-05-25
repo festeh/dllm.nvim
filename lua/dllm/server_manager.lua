@@ -1,20 +1,19 @@
 local class = require("dllm.class")
 local paths = require("dllm.paths")
 
-
+--- @class ServerManager
+--- @field new function
 local ServerManager = class.new(function(self, config)
   self.config = config
 end)
 
-function ServerManager:is_installed()
-  -- check if dllm is executable
-  local res = vim.system("dllm --version")
-  return res == 0
+function ServerManager:is_installed(opts)
+  return vim.fn.exepath(paths.dllm_server()) ~= ""
 end
 
 function ServerManager:install()
   vim.notify('Installing dllm')
-  if self:is_dllm_installed() then
+  if self:is_installed() then
     vim.notify('dllm is already installed')
     return
   end

@@ -10,7 +10,7 @@ M.dllm_repo = function()
 end
 
 M.dllm_server = function()
-  return M.dllm_repo() .. '/build/server'
+  return M.dllm_repo() .. '/build/dllm_server'
 end
 
 M.chats = function()
@@ -19,7 +19,7 @@ end
 
 
 M.exists = function(path)
-  return vim.fn.filereadable(path) ~= 0
+  return vim.fn.filereadable(path)
 end
 
 
