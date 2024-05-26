@@ -37,7 +37,7 @@ function ChatParsingContext:read_message_fn()
           return nil, err
         end
         local system_message = trim_left(line:sub(#config.system_prefix + 1))
-        gathered.messages[#gathered.messages + 1] = { role = "system", content = system_message }
+        gathered.messages[#gathered.messages + 1] = { role = "assistant", content = system_message }
         state = reading_system
       else
         gathered.messages[#gathered.messages].content = gathered.messages[#gathered.messages].content .. "\n" .. line
@@ -117,7 +117,10 @@ end
 
 function ClientInput:to_request_body()
   local result = {}
-  table.insert(result, { role = "", content = self.prompt })
+  table.insert(result, { role = "system", content = self.prompt })
+  for _, message in ipairs(self.messages) do
+    table.insert(result, message)
+  end
   return vim.json.encode(result)
 end
 
