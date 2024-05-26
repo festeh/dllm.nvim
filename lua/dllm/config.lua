@@ -2,7 +2,7 @@
 Config = {
   user_prefix = "User:",
   system_prefix = "System:",
-  default_provider = "anthropic",
+  provider = "anthropic",
   temperature = 0.0,
   max_tokens = 3000,
   openai = {

@@ -1,5 +1,10 @@
 local class = require("dllm.class")
 
+---@class ClientInput
+---@field params table
+---@field prompt string
+---@field messages table
+---@field new function
 local ClientInput = class.new(function(self, params, prompt, messages)
   self.params = params
   self.prompt = prompt
@@ -121,7 +126,7 @@ function ClientInput:to_request_body()
   for _, message in ipairs(self.messages) do
     table.insert(result, message)
   end
-  return vim.json.encode(result)
+  return vim.json.encode({query = result})
 end
 
 --- End parsing chat content
