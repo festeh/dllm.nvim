@@ -1,6 +1,7 @@
 local paths = require("dllm.paths")
 local class = require("dllm.class")
 local ClientInput = require("dllm.client_input")
+local Client = require("dllm.client")
 
 
 local function get_month(date)
@@ -39,10 +40,37 @@ Chat = class.new(function(self, config)
   self.config = config
 end)
 
+local function on_start()
+  print("start")
+end
+
+local function on_stdout_event(data)
+  --- append data to the current buffer
+  vim.api.nvim_buf_set_lines(0, -1, -1, false, { data })
+  print("stdout", data)
+end
+
+local function on_stderr_event(data)
+  --- append data to the current buffer
+  vim.api.nvim_buf_set_lines(0, -1, -1, false, { data })
+  print("stderr", data)
+end
+
+local function on_exit(code)
+  print("exit", code)
+end
+
 function Chat:respond(opts)
   local lines = vim.api.nvim_buf_get_lines(0, 0, -1, false)
   local client_input = ClientInput.from_chat(self.config, lines, opts)
-  local client = require("dllm.client").new(self.config, client_input)
+  local client_params = {
+    input = client_input,
+    on_start = on_start,
+    on_stdout_event = vim.schedule_wrap(on_stdout_event),
+    on_stderr_event = vim.schedule_wrap(on_stderr_event),
+    on_exit = vim.schedule_wrap(on_exit),
+  }
+  local client = Client.init(self.config, client_params)
   client:respond()
 end
 

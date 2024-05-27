@@ -32,6 +32,7 @@ function ChatParsingContext:read_message_fn()
   local function read_line(_, gathered, line)
     gathered.messages = gathered.messages or {}
     if state == reading_user then
+      print(line:sub(1, #config.user_prefix), config.user_prefix)
       if line:sub(1, #config.user_prefix) == config.user_prefix then
         local user_message = trim_left(line:sub(#config.user_prefix + 1))
         gathered.messages[#gathered.messages + 1] = { role = "user", content = user_message }
@@ -100,7 +101,8 @@ ClientInput.from_chat = function(config, lines, opts)
   local context = ChatParsingContext.new(config)
   local proc_fn = context.read_title
   --- reading header
-  for line in lines do
+  print("lines", vim.inspect(lines))
+  for _, line in ipairs(lines) do
     print("line", line)
     local new_fn, err = proc_fn(context, gathered, line)
     if not new_fn then
