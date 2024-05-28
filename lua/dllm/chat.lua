@@ -47,7 +47,8 @@ end
 local function append_text(bufnr, text)
   local line = vim.api.nvim_buf_line_count(bufnr) - 1
   local col = vim.api.nvim_buf_get_lines(bufnr, line, line + 1, false)[1]:len()
-  vim.api.nvim_buf_set_text(bufnr, line, col, line, col, { text })
+  local lines = vim.split(text, "\n")
+  vim.api.nvim_buf_set_text(bufnr, line, col, line, col, lines)
 end
 
 local function on_stdout_event(data)
