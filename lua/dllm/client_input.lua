@@ -123,12 +123,12 @@ ClientInput.from_chat = function(config, lines, opts)
 end
 
 function ClientInput:to_request_body()
-  local result = {}
-  table.insert(result, { role = "system", content = self.prompt })
+  local messages = {}
+  table.insert(messages, { role = "system", content = self.prompt })
   for _, message in ipairs(self.messages) do
-    table.insert(result, message)
+    table.insert(messages, message)
   end
-  return vim.json.encode({query = result})
+  return vim.json.encode({messages = messages})
 end
 
 --- End parsing chat content

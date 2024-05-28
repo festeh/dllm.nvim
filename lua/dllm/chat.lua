@@ -44,15 +44,20 @@ local function on_start()
   print("start")
 end
 
+local function append_text(bufnr, text)
+  local line = vim.api.nvim_buf_line_count(bufnr) - 1
+  local col = vim.api.nvim_buf_get_lines(bufnr, line, line + 1, false)[1]:len()
+  vim.api.nvim_buf_set_text(bufnr, line, col, line, col, { text })
+end
+
 local function on_stdout_event(data)
   --- append data to the current buffer
-  vim.api.nvim_buf_set_lines(0, -1, -1, false, { data })
+  append_text(0, data)
   print("stdout", data)
 end
 
 local function on_stderr_event(data)
-  --- append data to the current buffer
-  vim.api.nvim_buf_set_lines(0, -1, -1, false, { data })
+  append_text(0, data)
   print("stderr", data)
 end
 
@@ -74,6 +79,10 @@ function Chat:respond(opts)
   client:respond()
 end
 
+Chat.init_buf = function()
+  vim.api.nvim_command("setlocal wrap linebreak")
+end
+
 Chat.create_file = function(config)
   local chat = Chat.new(config)
 
@@ -91,6 +100,8 @@ Chat.create_file = function(config)
   vim.cmd [[/^role:/]]
   vim.cmd [[nohlsearch]]
   vim.cmd [[startinsert!]]
+
+  Chat.init_buf()
   return chat
 end
 

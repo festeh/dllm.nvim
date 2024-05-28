@@ -30,7 +30,6 @@ function Client:respond()
   local prov = self.config.provider or "dummy"
   local url = "http://" .. host .. ":" .. port .. "/" .. prov
   local input = self.params.input
-  print("Sending request to " .. url)
   local curl_args = {
     url = url,
     body = input:to_request_body(),
