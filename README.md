@@ -15,5 +15,6 @@ that I really like! I decided to write my own plugin in order to use more provid
 # Requirements
 * Neovim >= 0.10.0
 * curl
+* rg + Telescope for finding files with chats
 * plugin also installs [dllm](https://github.com/festeh/dllm) server
 * API keys, of course
