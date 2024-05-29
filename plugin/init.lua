@@ -12,6 +12,16 @@ vim.api.nvim_create_user_command("Lmnewchat",
   }
 )
 
+vim.api.nvim_create_user_command("Lmfindchat",
+  function(opts)
+    require("telescope").extensions.dllm.dllm(opts)
+  end,
+  {
+    desc = "Find a chat file",
+    force = true,
+  }
+)
+
 vim.api.nvim_create_user_command("Lmrespond",
   function(opts)
     local chat = Chat.new(config)
@@ -22,3 +32,4 @@ vim.api.nvim_create_user_command("Lmrespond",
     force = true,
   }
 )
+
