@@ -13,8 +13,11 @@ local colors = function(opts)
   }):find()
 end
 
-require("telescope").register_extension {
+return require("telescope").register_extension {
+  setup = function(ext_config, config)
+    -- access extension config and user config
+  end,
   exports = {
-    dllm = colors
-  },
+    dllm = colors,
+  }
 }
