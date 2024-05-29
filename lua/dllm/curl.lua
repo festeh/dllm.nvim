@@ -38,21 +38,17 @@ function Curl.request(config, params)
   local proc_handle = uv.spawn("curl", { args = args, stdio = { nil, stdout, stderr }, detached = true}, on_exit)
 
   if params.on_stdout_event then
-    uv.read_start(stdout, function(err, data)
+    uv.read_start(stdout, function(_, data)
       if data then
         params.on_stdout_event(data)
-      else
-        vim.notify("error while reading stdout", err)
       end
     end)
   end
 
   if params.on_stderr_event then
-    uv.read_start(stderr, function(err, data)
+    uv.read_start(stderr, function(_, data)
       if data then
         params.on_stderr_event(data)
-      else
-        vim.notify("error while reading stderr", err)
       end
     end)
   end

@@ -60,15 +60,24 @@ local function on_stderr_event(data)
   append_text(0, data)
 end
 
-local function on_exit(code)
+local function append_prefix(prefix)
+  local lines = vim.api.nvim_buf_get_lines(0, -2, -1, false)
+  if #lines == 0 or lines[1] ~= "" then
+    vim.api.nvim_buf_set_lines(0, -1, -1, false, { "" })
+  end
+  vim.api.nvim_buf_set_lines(0, -1, -1, false, { prefix })
+  vim.api.nvim_buf_set_lines(0, -1, -1, false, { "" })
 end
 
 function Chat:get_on_start()
-  local prefix = self.config.system_prefix
   return function()
-    vim.api.nvim_buf_set_lines(0, -1, -1, false, {""})
-    vim.api.nvim_buf_set_lines(0, -1, -1, false, {prefix})
-    vim.api.nvim_buf_set_lines(0, -1, -1, false, {""})
+    append_prefix(self.config.system_prefix)
+  end
+end
+
+function Chat:get_on_exit()
+  return function()
+    append_prefix(self.config.user_prefix)
   end
 end
 
@@ -80,7 +89,7 @@ function Chat:respond(opts)
     on_start = self:get_on_start(),
     on_stdout_event = vim.schedule_wrap(on_stdout_event),
     on_stderr_event = vim.schedule_wrap(on_stderr_event),
-    on_exit = vim.schedule_wrap(on_exit),
+    on_exit = vim.schedule_wrap(self:get_on_exit())
   }
   local client = Client.init(self.config, client_params)
   client:respond()
