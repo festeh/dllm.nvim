@@ -33,3 +33,11 @@ vim.api.nvim_create_user_command("Lmrespond",
   }
 )
 
+local chat_path = require('dllm.paths').chats()
+vim.api.nvim_create_autocmd({ "BufEnter", }, {
+  pattern = { chat_path .. "/" .. "*.md", },
+  desc = "Wrap lines in chat files",
+  callback = function(ev)
+    vim.api.nvim_command("setlocal wrap linebreak")
+  end
+})

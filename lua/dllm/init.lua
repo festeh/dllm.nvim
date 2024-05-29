@@ -11,13 +11,15 @@ M.setup = function(config)
 end
 
 
--- M.init = function(config)
---     
--- end
-
-M.ping = function()
-    print("ping")
-    print("ping")
+M.reset = function()
+    local to_kill = {"dllm", "telescope"}
+    for mod, _ in pairs(package.loaded) do
+        for _, name in ipairs(to_kill) do
+            if mod:match(name) then
+                package.loaded[mod] = nil
+            end
+        end
+    end
 end
 
 return M

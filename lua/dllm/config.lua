@@ -1,4 +1,6 @@
 --- @class Config
+--- @field user_prefix string
+--- @field system_prefix string
 Config = {
   user_prefix = "User:",
   system_prefix = "System:",
