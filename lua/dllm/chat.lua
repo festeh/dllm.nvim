@@ -38,8 +38,7 @@ end
 
 --- @class Chat
 --- @field config Config
-
---- @param config Config
+--- @field new function
 Chat = class.new(function(self, config)
   self.config = config
 end)
