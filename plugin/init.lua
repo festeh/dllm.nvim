@@ -1,9 +1,7 @@
-local Chat = require('dllm.chat')
-local config = require('dllm.config')
-
-
 vim.api.nvim_create_user_command("Lmnewchat",
   function(_)
+    local Chat = require('dllm.chat')
+    local config = require('dllm.config')
     Chat.create_file(config)
   end,
   {
@@ -24,11 +22,29 @@ vim.api.nvim_create_user_command("Lmfindchat",
 
 vim.api.nvim_create_user_command("Lmrespond",
   function(opts)
-    local chat = Chat.new(config)
-    chat:respond(opts)
+    local Chat = require('dllm.chat')
+    local config = require('dllm.config')
+    local chat = Chat.from_file(config, opts)
+    if chat == nil then
+      return
+    end
+    chat:respond()
   end,
   {
     desc = "Get response from LLM provider using last N messages as a context",
+    force = true,
+  }
+)
+
+vim.api.nvim_create_user_command("Lmsetprovider",
+  function(opts)
+    local chat = Chat.from_file(config)
+    if chat == nil then
+      return
+    end
+  end,
+  {
+    desc = "Set the provider for the chat",
     force = true,
   }
 )

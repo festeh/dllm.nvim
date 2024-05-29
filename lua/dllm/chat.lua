@@ -38,10 +38,39 @@ end
 
 --- @class Chat
 --- @field config Config
+--- @field client_input ClientInput
 --- @field new function
-Chat = class.new(function(self, config)
+Chat = class.new(function(self, config, client_input)
   self.config = config
+  self.client_input = client_input
 end)
+
+--- @return Chat | nil
+Chat.from_file = function(config, opts)
+  local lines = vim.api.nvim_buf_get_lines(0, 0, -1, false)
+  local client_input = ClientInput.from_chat(config, lines, opts)
+  if client_input == nil then
+    vim.notify("A dllm chat must be opened in the current buffer")
+    return nil
+  end
+  return Chat.new(config, client_input)
+end
+
+function Chat:set_provider(provider)
+  --- find first line starting with "---"
+  local lines = vim.api.nvim_buf_get_lines(0, 0, -1, false)
+  local found = nil
+  for i, line in ipairs(lines) do
+    if line == "---" then
+      found = i
+      break
+    end
+  end
+  --- insert the provider line before the "---" line
+  if found then
+    vim.api.nvim_buf_set_lines(0, found, found, false, { "provider: " .. provider })
+  end
+end
 
 
 local function append_text(bufnr, text)
@@ -81,11 +110,9 @@ function Chat:get_on_exit()
   end
 end
 
-function Chat:respond(opts)
-  local lines = vim.api.nvim_buf_get_lines(0, 0, -1, false)
-  local client_input = ClientInput.from_chat(self.config, lines, opts)
+function Chat:respond()
   local client_params = {
-    input = client_input,
+    input = self.client_input,
     on_start = self:get_on_start(),
     on_stdout_event = vim.schedule_wrap(on_stdout_event),
     on_stderr_event = vim.schedule_wrap(on_stderr_event),
