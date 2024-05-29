@@ -12,51 +12,39 @@ local ClientInput = class.new(function(self, params, prompt, messages)
 end)
 
 --- Parsing the chat content
-local function trim_left(s)
-  return s:match("^%s*(.+)$")
+local function trim(s)
+  return s:match("^%s*(.-)%s*$")
 end
 
 ChatParsingContext = class.new(function(self, config)
   self.config = config
 end)
 
-local reading_user = 2
-local reading_system = 4
-
 function ChatParsingContext:read_message_fn()
-  local state = reading_user
   local found_start = false
-  local err = nil
   local config = self.config
-
   local function read_line(_, gathered, line)
     gathered.messages = gathered.messages or {}
-    if state == reading_user then
-      if line:sub(1, #config.user_prefix) == config.user_prefix then
-        local user_message = trim_left(line:sub(#config.user_prefix + 1))
-        gathered.messages[#gathered.messages + 1] = { role = "user", content = user_message }
-        found_start = true
-      elseif line:sub(1, #config.system_prefix) == config.system_prefix then
-        if not found_start then
-          err = "System message found before first user message"
-          return nil, err
-        end
-        local system_message = trim_left(line:sub(#config.system_prefix + 1))
-        gathered.messages[#gathered.messages + 1] = { role = "assistant", content = system_message }
-        state = reading_system
-      else
-        gathered.messages[#gathered.messages].content = gathered.messages[#gathered.messages].content .. "\n" .. line
-      end
-    elseif state == reading_system then
-      if line:sub(1, #config.user_prefix) == config.user_prefix then
-        state = reading_user
-        local user_message = trim_left(line:sub(#config.user_prefix + 1))
-        gathered.messages[#gathered.messages + 1] = { role = "user", content = user_message }
-      else
-        gathered.messages[#gathered.messages].content = gathered.messages[#gathered.messages].content .. "\n" .. line
-      end
+    if line == "" then
+      return read_line, nil
     end
-    return read_line
+    if line:sub(1, #config.user_prefix) == config.user_prefix then
+      local msg = line:sub(#config.user_prefix + 1)
+      gathered.messages[#gathered.messages + 1] = { role = "user", content = msg }
+      found_start = true
+    elseif line:sub(1, #config.system_prefix) == config.system_prefix then
+      if not found_start then
+        return nil, "System message found before first user message"
+      end
+      local msg = line:sub(#config.system_prefix + 1)
+      gathered.messages[#gathered.messages + 1] = { role = "assistant", content = msg }
+    else
+      if #gathered.messages == 0 then
+        return nil, "No user message found"
+      end
+      gathered.messages[#gathered.messages].content = gathered.messages[#gathered.messages].content .. "\n" .. line
+    end
+    return read_line, nil
   end
 
   return read_line
@@ -88,11 +76,12 @@ end
 
 function ChatParsingContext:read_title(gathered, line)
   local title = line:match("^Title: (.+)$")
-  if title then
-    gathered.title = title
-    return self.read_empty_line, nil
+  if not title then
+    vim.notify("Title for chat not found", vim.log.levels.WARN)
+    title = ""
   end
-  return nil, "Title not found"
+  gathered.title = title
+  return self.read_empty_line, nil
 end
 
 ClientInput.from_chat = function(config, lines, opts)
@@ -116,6 +105,9 @@ ClientInput.from_chat = function(config, lines, opts)
   if opts.n ~= nil then
     gathered.messages = { table.unpack(gathered.messages, #gathered.messages - opts.n + 1) }
   end
+  for _, message in ipairs(gathered.messages) do
+    message.content = trim(message.content)
+  end
   return ClientInput.new(gathered.params, gathered.prompt, gathered.messages)
 end
 
@@ -125,7 +117,7 @@ function ClientInput:to_request_body()
   for _, message in ipairs(self.messages) do
     table.insert(messages, message)
   end
-  return vim.json.encode({messages = messages})
+  return vim.json.encode({ messages = messages })
 end
 
 --- End parsing chat content

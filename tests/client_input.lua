@@ -1,27 +1,40 @@
 local ClientInput = require("dllm.client_input")
 
-
-local input =
-[[Title: hello
-
+describe("ClientInput", function()
+  it("should parse the input", function()
+    local input =
+    [[
+Title: hello
 params1: too
 role: You are a clown
 tmp: 1.11
 ---
-> Ping
+> 
+Ping
 and pong
 < Pong
+> foo
+bar
 ]]
-
-local config = {
-  user_prefix = ">",
-  system_prefix = "<"
-}
-
-local inp = ClientInput.from_chat(config, input)
-if inp == nil then
-  vim.notify("Failed to parse input")
-  return
+    local config = {
+      user_prefix = ">",
+      system_prefix = "<"
+    }
+    local inp = ClientInput.from_chat(config, vim.split(input, "\n"))
+    if inp == nil then
+      assert.is_true(false)
+    end
+    assert.are.same(inp.prompt, "You are a clown")
+    local exp =  {
+      { role = "user",      content = "Ping\nand pong" },
+      { role = "assistant", content = "Pong" },
+      { role = "user",      content = "foo\nbar" }
+    }
+    for i, v in ipairs(exp) do
+      assert.are.same(inp.messages[i].role, v.role)
+      assert.are.same(inp.messages[i].content, v.content)
+    end
+  end)
 end
+)
 
-print(vim.inspect(inp))
