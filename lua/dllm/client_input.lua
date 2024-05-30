@@ -36,7 +36,8 @@ function ChatParsingContext:read_message_fn()
       if not found_start then
         return nil, "System message found before first user message"
       end
-      local msg = line:sub(#config.system_prefix + 1)
+      -- assume that system message is always below system prefix
+      local msg = ""
       gathered.messages[#gathered.messages + 1] = { role = "assistant", content = msg }
     else
       if #gathered.messages == 0 then

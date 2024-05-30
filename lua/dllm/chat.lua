@@ -40,9 +40,11 @@ end
 --- @field config Config
 --- @field client_input ClientInput
 --- @field new function
+--- @field got_model_info boolean
 Chat = class.new(function(self, config, client_input)
   self.config = config
   self.client_input = client_input
+  self.got_model_info = false
 end)
 
 --- @return Chat | nil
@@ -89,14 +91,6 @@ local function append_text(bufnr, text)
   vim.api.nvim_buf_set_text(bufnr, line, col, line, col, lines)
 end
 
-local function on_stdout_event(data)
-  --- append data to the current buffer
-  append_text(0, data)
-end
-
-local function on_stderr_event(data)
-  append_text(0, data)
-end
 
 local function append_prefix(prefix)
   local lines = vim.api.nvim_buf_get_lines(0, -2, -1, false)
@@ -104,7 +98,6 @@ local function append_prefix(prefix)
     vim.api.nvim_buf_set_lines(0, -1, -1, false, { "" })
   end
   vim.api.nvim_buf_set_lines(0, -1, -1, false, { prefix })
-  vim.api.nvim_buf_set_lines(0, -1, -1, false, { "" })
 end
 
 function Chat:get_on_start()
@@ -119,11 +112,37 @@ function Chat:get_on_exit()
   end
 end
 
+function Chat:get_on_stdout_event()
+  return function(data)
+    if not self.got_model_info and string.find(data, "^dllm:") then
+      local model_info = string.match(data, "^dllm:(.-)\n")
+      local decoded = vim.fn.json_decode(model_info)
+      print(vim.inspect(decoded))
+      local model = decoded.model or "unknown model"
+      local res = string.format(" (%s)", model)
+      append_text(0, res)
+      vim.api.nvim_buf_set_lines(0, -1, -1, false, { "" })
+      self.got_model_info = true
+      local lines = vim.split(data, "\n")
+      if #lines > 1 then
+        data = lines[2]
+      else
+        return
+      end
+    end
+    append_text(0, data)
+  end
+end
+
+local function on_stderr_event(data)
+  append_text(0, data)
+end
+
 function Chat:respond()
   local client_params = {
     input = self.client_input,
     on_start = self:get_on_start(),
-    on_stdout_event = vim.schedule_wrap(on_stdout_event),
+    on_stdout_event = vim.schedule_wrap(self:get_on_stdout_event()),
     on_stderr_event = vim.schedule_wrap(on_stderr_event),
     on_exit = vim.schedule_wrap(self:get_on_exit())
   }
