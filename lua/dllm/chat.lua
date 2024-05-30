@@ -56,7 +56,7 @@ Chat.from_file = function(config, opts)
   return Chat.new(config, client_input)
 end
 
-function Chat:set_provider(provider)
+function Chat:set_param(name, value)
   --- find first line starting with "---"
   local lines = vim.api.nvim_buf_get_lines(0, 0, -1, false)
   local found = nil
@@ -66,12 +66,21 @@ function Chat:set_provider(provider)
       break
     end
   end
-  --- insert the provider line before the "---" line
-  if found then
-    vim.api.nvim_buf_set_lines(0, found, found, false, { "provider: " .. provider })
+  if not found then
+    return
   end
+  local newline = name .. ": " .. value
+  for i, line in ipairs(lines) do
+    if i >= found then
+      break
+    end
+    if line:find(name) then
+      vim.api.nvim_buf_set_lines(0, i - 1, i, false, { newline })
+      return
+    end
+  end
+  vim.api.nvim_buf_set_lines(0, found - 1, found - 1, false, { newline })
 end
-
 
 local function append_text(bufnr, text)
   local line = vim.api.nvim_buf_line_count(bufnr) - 1

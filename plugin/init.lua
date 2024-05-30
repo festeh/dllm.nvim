@@ -36,16 +36,46 @@ vim.api.nvim_create_user_command("Lmrespond",
   }
 )
 
+local function set_chat_param(name, value)
+  local Chat = require('dllm.chat')
+  local config = require('dllm.config')
+  local chat = Chat.from_file(config)
+  if chat == nil then
+    return
+  end
+  chat:set_param(name, value)
+end
+
 vim.api.nvim_create_user_command("Lmsetprovider",
   function(opts)
-    local chat = Chat.from_file(config)
-    if chat == nil then
-      return
-    end
+    set_chat_param("provider", opts.args)
   end,
   {
     desc = "Set the provider for the chat",
     force = true,
+    nargs = 1,
+  }
+)
+
+vim.api.nvim_create_user_command("Lmsetmodel",
+  function(opts)
+    set_chat_param("model", opts.args)
+  end,
+  {
+    desc = "Set the model for the chat",
+    force = true,
+    nargs = 1,
+  }
+)
+
+vim.api.nvim_create_user_command("Lmsettemperature",
+  function(opts)
+    set_chat_param("temperature", opts.args)
+  end,
+  {
+    desc = "Set the context for the chat",
+    force = true,
+    nargs = 1,
   }
 )
 
