@@ -25,11 +25,11 @@ function Client.init(config, params)
 end
 
 function Client:respond()
+  local input = self.params.input
   local host = self.config.hostname or "localhost"
   local port = self.config.port
-  local prov = self.config.provider or "dummy"
+  local prov = input.params.provider or self.config.provider or "dummy"
   local url = "http://" .. host .. ":" .. port .. "/" .. prov
-  local input = self.params.input
   local curl_args = {
     url = url,
     body = input:to_request_body(),

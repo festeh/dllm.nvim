@@ -118,7 +118,16 @@ function ClientInput:to_request_body()
   for _, message in ipairs(self.messages) do
     table.insert(messages, message)
   end
-  return vim.json.encode({ messages = messages })
+  local params = {}
+  for _, name in ipairs({"model", "temperature", "max_tokens", "provider"}) do
+    if self.params[name] then
+      params[name] = self.params[name]
+      if name == "temperature" or name == "max_tokens" then
+        params[name] = tonumber(params[name])
+      end
+    end
+  end
+  return vim.json.encode({ messages = messages, parameters = params })
 end
 
 --- End parsing chat content
