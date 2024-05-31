@@ -139,6 +139,10 @@ local function on_stderr_event(data)
 end
 
 function Chat:respond()
+  local server_manager = require("dllm.server_manager").new(self.config)
+  if not server_manager:is_running() then
+    server_manager:start()
+  end
   local client_params = {
     input = self.client_input,
     on_start = self:get_on_start(),

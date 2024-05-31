@@ -108,6 +108,30 @@ vim.api.nvim_create_user_command("Lmsetmaxtokens",
   }
 )
 
+vim.api.nvim_create_user_command("Lminstallserver",
+  function(opts)
+    local config = require('dllm.config')
+    local manager = require('dllm.server_manager').new(config)
+    manager:install()
+  end,
+  {
+    desc = "Update the dllm server for the chat",
+    force = true,
+  }
+)
+
+vim.api.nvim_create_user_command("Lmupdateserver",
+  function(opts)
+    local config = require('dllm.config')
+    local manager = require('dllm.server_manager').new(config)
+    manager:update()
+  end,
+  {
+    desc = "Update the dllm server for the chat",
+    force = true,
+  }
+)
+
 local chat_path = require('dllm.paths').chats()
 vim.api.nvim_create_autocmd({ "BufEnter", }, {
   pattern = { chat_path .. "/" .. "*.md", },

@@ -19,7 +19,7 @@ end
 
 
 M.exists = function(path)
-  return vim.fn.filereadable(path)
+  return vim.fn.filereadable(path) == 1 or vim.fn.isdirectory(path) == 1
 end
 
 
