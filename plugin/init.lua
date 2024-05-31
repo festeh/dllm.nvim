@@ -54,6 +54,16 @@ vim.api.nvim_create_user_command("Lmsetprovider",
     desc = "Set the provider for the chat",
     force = true,
     nargs = 1,
+    complete = function(ArgLead, CmdLine, CursorPos)
+      local options = { "anthropic", "openai" }
+      local matches = {}
+      for _, opt in ipairs(options) do
+        if string.sub(opt, 1, string.len(ArgLead)) == ArgLead then
+          table.insert(matches, opt)
+        end
+      end
+      return matches
+    end,
   }
 )
 
@@ -70,7 +80,26 @@ vim.api.nvim_create_user_command("Lmsetmodel",
 
 vim.api.nvim_create_user_command("Lmsettemperature",
   function(opts)
+    if not tonumber(opts.args) then
+      vim.notify("Temperature must be a number", vim.log.levels.WARN)
+      return
+    end
     set_chat_param("temperature", opts.args)
+  end,
+  {
+    desc = "Set the context for the chat",
+    force = true,
+    nargs = 1,
+  }
+)
+
+vim.api.nvim_create_user_command("Lmsetmaxtokens",
+  function(opts)
+    if not tonumber(opts.args) then
+      vim.notify("Max tokens must be a number", vim.log.levels.WARN)
+      return
+    end
+    set_chat_param("max_tokens", opts.args)
   end,
   {
     desc = "Set the context for the chat",
