@@ -60,6 +60,10 @@ local chats = function(opts)
   local res = vim.system(cmd, { cwd = cwd, text = true }):wait()
   local results = vim.split(res.stdout, "\n")
   local reduced = reduce(results)
+  if #reduced == 0 then
+    vim.notify("No existing chats found, create a new one with :Lmnewchat")
+    return
+  end
   local finder = finders.new_table {
     results = reduced,
     entry_maker = function(line)
