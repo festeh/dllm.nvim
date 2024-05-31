@@ -119,7 +119,7 @@ function ClientInput:to_request_body()
     table.insert(messages, message)
   end
   local params = {}
-  for _, name in ipairs({"model", "temperature", "max_tokens", "provider"}) do
+  for _, name in ipairs({"model", "temperature", "max_tokens"}) do
     if self.params[name] then
       params[name] = self.params[name]
       if name == "temperature" or name == "max_tokens" then
@@ -127,6 +127,7 @@ function ClientInput:to_request_body()
       end
     end
   end
+  params["source"] = "dllm.nvim"
   return vim.json.encode({ messages = messages, parameters = params })
 end
 
