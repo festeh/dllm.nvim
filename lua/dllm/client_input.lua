@@ -109,6 +109,22 @@ ClientInput.from_chat = function(config, lines, opts)
   for _, message in ipairs(gathered.messages) do
     message.content = trim(message.content)
   end
+  if not opts.n_messages then
+    opts.n_messages = 1
+  end
+  local filtered_messages = {}
+  local user_messages_count = 0
+  for i = #gathered.messages, 1, -1 do
+    table.insert(filtered_messages, 1, gathered.messages[i])
+    if gathered.messages[i].role == "user" then
+      user_messages_count = user_messages_count + 1
+      if user_messages_count >= opts.n_messages then
+        break
+      end
+    end
+  end
+  gathered.messages = filtered_messages
+
   return ClientInput.new(gathered.params, gathered.prompt, gathered.messages)
 end
 
@@ -119,7 +135,7 @@ function ClientInput:to_request_body()
     table.insert(messages, message)
   end
   local params = {}
-  for _, name in ipairs({"model", "temperature", "max_tokens"}) do
+  for _, name in ipairs({ "model", "temperature", "max_tokens" }) do
     if self.params[name] then
       params[name] = self.params[name]
       if name == "temperature" or name == "max_tokens" then

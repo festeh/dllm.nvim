@@ -22,8 +22,17 @@ vim.api.nvim_create_user_command("Lmfindchat",
 
 vim.api.nvim_create_user_command("Lmrespond",
   function(opts)
+    local args = opts.args
+    if args == "" or args == nil then
+      args = 1
+    end
+    if not tonumber(args) or tonumber(args) == 0 then
+      vim.notify("Argument must be a positive number", vim.log.levels.WARN)
+      return
+    end
     local Chat = require('dllm.chat')
     local config = require('dllm.config')
+    opts.n_messages = tonumber(args)
     local chat = Chat.from_file(config, opts)
     if chat == nil then
       return
@@ -33,6 +42,7 @@ vim.api.nvim_create_user_command("Lmrespond",
   {
     desc = "Get response from LLM provider using last N messages as a context",
     force = true,
+    nargs = "?",
   }
 )
 
