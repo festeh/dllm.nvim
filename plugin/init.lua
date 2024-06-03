@@ -148,5 +148,6 @@ vim.api.nvim_create_autocmd({ "BufEnter", }, {
   desc = "Wrap lines in chat files",
   callback = function(ev)
     vim.api.nvim_command("setlocal wrap linebreak")
+    vim.api.nvim_buf_set_keymap(0, "n", "<CR>", ":Lmrespond<CR>", { noremap = true, silent = true })
   end
 })

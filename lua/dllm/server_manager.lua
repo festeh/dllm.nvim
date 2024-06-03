@@ -87,7 +87,8 @@ function ServerManager:start()
       vim.notify('dllm server exited')
     end
   })
-  vim.notify('dllm server started')
+  vim.wait(100)
+  vim.notify('dllm server job completed')
 end
 
 return ServerManager
