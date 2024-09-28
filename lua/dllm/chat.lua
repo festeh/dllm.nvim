@@ -84,6 +84,17 @@ function Chat:set_param(name, value)
   vim.api.nvim_buf_set_lines(0, found - 1, found - 1, false, { newline })
 end
 
+function Chat:get_param(name)
+  local lines = vim.api.nvim_buf_get_lines(0, 0, -1, false)
+  for _, line in ipairs(lines) do
+    local key, value = string.match(line, "^(.-):%s*(.+)$")
+    if key == name then
+      return value
+    end
+  end
+  return nil
+end
+
 local function append_text(bufnr, text)
   local line = vim.api.nvim_buf_line_count(bufnr) - 1
   local col = vim.api.nvim_buf_get_lines(bufnr, line, line + 1, false)[1]:len()

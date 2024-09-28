@@ -56,6 +56,22 @@ local function set_chat_param(name, value)
   chat:set_param(name, value)
 end
 
+local function get_chat_param(name)
+  local Chat = require('dllm.chat')
+  local config = require('dllm.config')
+  local chat = Chat.from_file(config)
+  if chat == nil then
+    return
+  end
+  return chat:get_param(name)
+end
+
+local function add_match(matches, opt, ArgLead)
+  if string.sub(opt, 1, string.len(ArgLead)) == ArgLead then
+    table.insert(matches, opt)
+  end
+end
+
 vim.api.nvim_create_user_command("Lmsetprovider",
   function(opts)
     set_chat_param("provider", opts.args)
@@ -68,9 +84,7 @@ vim.api.nvim_create_user_command("Lmsetprovider",
       local options = { "anthropic", "openai" }
       local matches = {}
       for _, opt in ipairs(options) do
-        if string.sub(opt, 1, string.len(ArgLead)) == ArgLead then
-          table.insert(matches, opt)
-        end
+        add_match(matches, opt, ArgLead)
       end
       return matches
     end,
@@ -85,6 +99,20 @@ vim.api.nvim_create_user_command("Lmsetmodel",
     desc = "Set the model for the chat",
     force = true,
     nargs = 1,
+    complete = function(ArgLead, CmdLine, CursorPos)
+      local matches = {}
+      local provider = get_chat_param("provider")
+      local options = {}
+      if provider == "openai" then
+        options = { "gpt-4", "gpt-4o", "gpt-o1" }
+      elseif provider == "anthropic" then
+        options = { "claude-3-5-sonnet-20240620", "claude-3-opus-20240229" }
+      end
+      for _, opt in ipairs(options) do
+        add_match(matches, opt, ArgLead)
+      end
+      return matches
+    end,
   }
 )
 
